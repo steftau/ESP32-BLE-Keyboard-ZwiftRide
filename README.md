@@ -1,6 +1,20 @@
 # ESP32 BLE Keyboard library
 
-This library allows you to make the ESP32 act as a Bluetooth Keyboard and control what it does.  
+This library fork allows you to compile @fuenfachsen's Zword_ZwiftRide-to-BLE-Keyboard.
+https://github.com/Fuenfachsen/Zword_ZwiftRide-to-BLE-Keyboard
+
+Lines 105 and 116 changed in ESP32_BLE_Keyboard/BleKeyboard.cpp
+
+LINE 106: BLEDevice::init(deviceName.c_str());
+...
+LINE 117: hid->manufacturer()->setValue(deviceManufacturer.c_str()); 
+
+See original issue: https://github.com/T-vK/ESP32-BLE-Keyboard/issues/291
+
+
+----------------------------------------------------------------------------------------------------------
+Changes only in 
+
 You might also be interested in:
 - [ESP32-BLE-Mouse](https://github.com/T-vK/ESP32-BLE-Mouse)
 - [ESP32-BLE-Gamepad](https://github.com/lemmingDev/ESP32-BLE-Gamepad)
