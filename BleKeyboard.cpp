@@ -1,5 +1,3 @@
-#include "BleKeyboard.h"
-
 #if defined(USE_NIMBLE)
 #include <NimBLEDevice.h>
 #include <NimBLEServer.h>
@@ -16,6 +14,7 @@
 #include <driver/adc.h>
 #include "sdkconfig.h"
 
+#include "BleKeyboard.h"
 
 #if defined(CONFIG_ARDUHAL_ESP_LOG)
   #include "esp32-hal-log.h"
@@ -103,7 +102,7 @@ BleKeyboard::BleKeyboard(std::string deviceName, std::string deviceManufacturer,
 
 void BleKeyboard::begin(void)
 {
-  BLEDevice::init(deviceName);
+  BLEDevice::init(deviceName.c_str());
   BLEServer* pServer = BLEDevice::createServer();
   pServer->setCallbacks(this);
 
@@ -114,22 +113,14 @@ void BleKeyboard::begin(void)
 
   outputKeyboard->setCallbacks(this);
 
-  hid->manufacturer()->setValue(deviceManufacturer);
+  hid->manufacturer()->setValue(deviceManufacturer.c_str());
 
-  hid->pnp(0x02, vid, pid, version);
+  hid->pnp(0x02, 0xe502, 0xa111, 0x0210);
   hid->hidInfo(0x00, 0x01);
 
-
-#if defined(USE_NIMBLE)
-
-  BLEDevice::setSecurityAuth(true, true, true);
-
-#else
-
   BLESecurity* pSecurity = new BLESecurity();
-  pSecurity->setAuthenticationMode(ESP_LE_AUTH_REQ_SC_MITM_BOND);
 
-#endif // USE_NIMBLE
+  pSecurity->setAuthenticationMode(ESP_LE_AUTH_BOND);
 
   hid->reportMap((uint8_t*)_hidReportDescriptor, sizeof(_hidReportDescriptor));
   hid->startServices();
@@ -172,18 +163,6 @@ void BleKeyboard::setName(std::string deviceName) {
  */
 void BleKeyboard::setDelay(uint32_t ms) {
   this->_delay_ms = ms;
-}
-
-void BleKeyboard::set_vendor_id(uint16_t vid) { 
-	this->vid = vid; 
-}
-
-void BleKeyboard::set_product_id(uint16_t pid) { 
-	this->pid = pid; 
-}
-
-void BleKeyboard::set_version(uint16_t version) { 
-	this->version = version; 
 }
 
 void BleKeyboard::sendReport(KeyReport* keys)
@@ -468,7 +447,6 @@ void BleKeyboard::releaseAll(void)
     _mediaKeyReport[0] = 0;
     _mediaKeyReport[1] = 0;
 	sendReport(&_keyReport);
-	sendReport(&_mediaKeyReport);
 }
 
 size_t BleKeyboard::write(uint8_t c)
@@ -502,31 +480,13 @@ size_t BleKeyboard::write(const uint8_t *buffer, size_t size) {
 
 void BleKeyboard::onConnect(BLEServer* pServer) {
   this->connected = true;
-
-#if !defined(USE_NIMBLE)
-
-  BLE2902* desc = (BLE2902*)this->inputKeyboard->getDescriptorByUUID(BLEUUID((uint16_t)0x2902));
-  desc->setNotifications(true);
-  desc = (BLE2902*)this->inputMediaKeys->getDescriptorByUUID(BLEUUID((uint16_t)0x2902));
-  desc->setNotifications(true);
-
-#endif // !USE_NIMBLE
-
 }
 
 void BleKeyboard::onDisconnect(BLEServer* pServer) {
   this->connected = false;
-
 #if !defined(USE_NIMBLE)
-
-  BLE2902* desc = (BLE2902*)this->inputKeyboard->getDescriptorByUUID(BLEUUID((uint16_t)0x2902));
-  desc->setNotifications(false);
-  desc = (BLE2902*)this->inputMediaKeys->getDescriptorByUUID(BLEUUID((uint16_t)0x2902));
-  desc->setNotifications(false);
-
   advertising->start();
-
-#endif // !USE_NIMBLE
+#endif  // !USE_NIMBLE
 }
 
 void BleKeyboard::onWrite(BLECharacteristic* me) {
