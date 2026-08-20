@@ -13,7 +13,7 @@ See original issue: https://github.com/T-vK/ESP32-BLE-Keyboard/issues/291
 
 ## Zword example: ESP32 as a Zwift Ride BLE keyboard
 
-A copy of the Zword sketch is included here under [`examples/Zword`](examples/Zword/Zword.ino) so it can be opened straight from the Arduino IDE ("File" -> "Examples" -> "ESP32 BLE Keyboard" -> "Zword") after installing this library - no separate download needed.
+A copy of the Zword sketch is included here under [`Zword_v0-0-2`](Zword_v0-0-2/Zword_v0-0-2.ino) so it can be opened straight from the Arduino IDE ("File" -> "Examples" -> "ESP32 BLE Keyboard" -> "Zword") after installing this library - no separate download needed.
 
 Zword turns an ESP32 into a bridge between a **Zwift Ride** controller and a training app: it connects to the Ride controller over BLE as a client, reads its button-press notifications, and re-sends them as a standard **BLE keyboard** (advertised as "Zword") that any app can pair with like a regular keyboard. It's set up for the shortcuts of the **MyWhoosh** app. The Zwift Ride's "paddle" is intentionally ignored, and only the left/right Ride controllers are supported (not Zwift Play - those use encrypted messages).
 
