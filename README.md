@@ -1,4 +1,4 @@
-# ESP32 BLE Keyboard library
+# ESP32 BLE Keyboard library with ESP32 Program as a Zwift Ride BLE keyboard
 
 This library fork allows you to compile @fuenfachsen's Zword_ZwiftRide-to-BLE-Keyboard.
 https://github.com/Fuenfachsen/Zword_ZwiftRide-to-BLE-Keyboard
