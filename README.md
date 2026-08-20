@@ -1,21 +1,10 @@
-# ESP32 BLE Keyboard library
+# Zword — ESP32 Zwift Ride to BLE Keyboard
 
-This library fork allows you to compile @fuenfachsen's Zword_ZwiftRide-to-BLE-Keyboard.
-https://github.com/Fuenfachsen/Zword_ZwiftRide-to-BLE-Keyboard
-
-Lines 105 and 116 changed in ESP32_BLE_Keyboard/BleKeyboard.cpp
-
-LINE 106: BLEDevice::init(deviceName.c_str());
-...
-LINE 117: hid->manufacturer()->setValue(deviceManufacturer.c_str()); 
-
-See original issue: https://github.com/T-vK/ESP32-BLE-Keyboard/issues/291
-
-## Zword example: ESP32 as a Zwift Ride BLE keyboard
-
-A copy of the Zword sketch is included here under [`examples/Zword`](examples/Zword/Zword.ino) so it can be opened straight from the Arduino IDE ("File" -> "Examples" -> "ESP32 BLE Keyboard" -> "Zword") after installing this library - no separate download needed.
+A convenience build of @fuenfachsen's [Zword_ZwiftRide-to-BLE-Keyboard](https://github.com/Fuenfachsen/Zword_ZwiftRide-to-BLE-Keyboard): the sketch itself, plus the patched BLE keyboard library it needs, bundled together in one repo so you can clone and flash without hunting down a separate library fix.
 
 Zword turns an ESP32 into a bridge between a **Zwift Ride** controller and a training app: it connects to the Ride controller over BLE as a client, reads its button-press notifications, and re-sends them as a standard **BLE keyboard** (advertised as "Zword") that any app can pair with like a regular keyboard. It's set up for the shortcuts of the **MyWhoosh** app. The Zwift Ride's "paddle" is intentionally ignored, and only the left/right Ride controllers are supported (not Zwift Play - those use encrypted messages).
+
+The sketch lives in [`Zword_v0-0-2`](Zword_v0-0-2/Zword_v0-0-2.ino) - open that directly in the Arduino IDE.
 
 **Connection sequence:**
 1. Pair "Zword" as a Bluetooth keyboard on your PC/Tablet/Phone once (Bluetooth settings), then power off the ESP32.
@@ -35,7 +24,7 @@ Zword turns an ESP32 into a bridge between a **Zwift Ride** controller and a tra
 
 Progress is mirrored on the Serial monitor (115200 baud) while it's running.
 
-### Zword: connection stops working after a Zwift Ride firmware update
+## Troubleshooting: connection stops working after a Zwift Ride firmware update
 
 Zwift occasionally pushes a firmware update to the Ride controllers that can change the BLE service UUID the sketch relies on to find them. If the ESP32 used to connect fine and suddenly can't find the controller anymore, that's the most likely cause. The sketch only ever auto-connects based on that known service UUID - it never guesses by device name, since a full Zwift Ride setup has other BLE hardware nearby (e.g. a KICKR CORE trainer) that must not be mistaken for the Ride controller.
 
@@ -45,9 +34,20 @@ No re-flash needed to fix it: open the Arduino IDE's Serial monitor (115200 baud
 
 If it manages to connect but the known GATT service still isn't found, all service UUIDs actually present on the device are printed too - set the correct one with `!uuid=`.
 
+## Bundled: patched ESP32 BLE Keyboard library
+
+Zword needs the [T-vK/ESP32-BLE-Keyboard](https://github.com/T-vK/ESP32-BLE-Keyboard) library with a small patch applied, otherwise it won't compile against recent Arduino-ESP32 cores. This repo *is* that patched library (install it in the Arduino IDE like any other library), so no separate download or manual patching is needed.
+
+Lines 105 and 116 changed in ESP32_BLE_Keyboard/BleKeyboard.cpp:
+
+LINE 106: `BLEDevice::init(deviceName.c_str());`  
+LINE 117: `hid->manufacturer()->setValue(deviceManufacturer.c_str());`
+
+See original issue: https://github.com/T-vK/ESP32-BLE-Keyboard/issues/291
+
+The rest of this README documents that underlying library.
 
 ----------------------------------------------------------------------------------------------------------
-Changes only in 
 
 You might also be interested in:
 - [ESP32-BLE-Mouse](https://github.com/T-vK/ESP32-BLE-Mouse)
