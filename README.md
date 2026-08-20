@@ -11,6 +11,40 @@ LINE 117: hid->manufacturer()->setValue(deviceManufacturer.c_str());
 
 See original issue: https://github.com/T-vK/ESP32-BLE-Keyboard/issues/291
 
+## Zword example: ESP32 as a Zwift Ride BLE keyboard
+
+A copy of the Zword sketch is included here under [`examples/Zword`](examples/Zword/Zword.ino) so it can be opened straight from the Arduino IDE ("File" -> "Examples" -> "ESP32 BLE Keyboard" -> "Zword") after installing this library - no separate download needed.
+
+Zword turns an ESP32 into a bridge between a **Zwift Ride** controller and a training app: it connects to the Ride controller over BLE as a client, reads its button-press notifications, and re-sends them as a standard **BLE keyboard** (advertised as "Zword") that any app can pair with like a regular keyboard. It's set up for the shortcuts of the **MyWhoosh** app. The Zwift Ride's "paddle" is intentionally ignored, and only the left/right Ride controllers are supported (not Zwift Play - those use encrypted messages).
+
+**Connection sequence:**
+1. Pair "Zword" as a Bluetooth keyboard on your PC/Tablet/Phone once (Bluetooth settings), then power off the ESP32.
+2. For normal use: turn on the LEFT Ride controller (flashes blue), power on the ESP32, wait for the LEFT controller to vibrate once (connected) or twice (keyboard also connected), then turn on the RIGHT controller (flashes blue, then solid).
+3. Open your training app - it now receives the button presses below as keyboard input.
+
+**Button mapping:**
+
+| Left controller | Action | Right controller | Action |
+|---|---|---|---|
+| Any side button | Shift Down | Any side button | Shift Up |
+| Power | Play/Pause | A | Hello emote |
+| Left / Right | Prev. / Next track | Y | Hide/Show UI |
+| Up / Down | Volume up / down | B | Battery Low emote |
+| | | Z | Thumbs Up emote |
+| | | Power | Pause/Resume ride |
+
+Progress is mirrored on the Serial monitor (115200 baud) while it's running.
+
+### Zword: connection stops working after a Zwift Ride firmware update
+
+Zwift occasionally pushes a firmware update to the Ride controllers that can change the BLE service UUID the sketch relies on to find them. If the ESP32 used to connect fine and suddenly can't find the controller anymore, that's the most likely cause. The sketch only ever auto-connects based on that known service UUID - it never guesses by device name, since a full Zwift Ride setup has other BLE hardware nearby (e.g. a KICKR CORE trainer) that must not be mistaken for the Ride controller.
+
+No re-flash needed to fix it: open the Arduino IDE's Serial monitor (115200 baud) - the sketch prints its available commands on boot:
+- `?scan` - scans for 10s and logs every nearby BLE device (name, address, advertised service UUIDs), so you can identify the Ride controller among your other Bluetooth hardware and see what UUID it advertises now.
+- `!uuid=<uuid>` - sets and **persists** (survives reboot) a new Zwift service UUID and immediately reconnects with it, e.g. `!uuid=0000FC82-0000-1000-8000-00805F9B34FB`.
+
+If it manages to connect but the known GATT service still isn't found, all service UUIDs actually present on the device are printed too - set the correct one with `!uuid=`.
+
 
 ----------------------------------------------------------------------------------------------------------
 Changes only in 
